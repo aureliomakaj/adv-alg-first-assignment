@@ -1,0 +1,9 @@
+File                    Prim            Kruskal         Kruskal Union Find
+input_random_17_100     -141960         -141960         -141960         
+input_random_21_200     -510185         -510185         -510185
+input_random_25_400     -1119906        -1119906        -1119906
+input_random_29_800     -1541291        -1541291        -1541291
+
+
+
+
