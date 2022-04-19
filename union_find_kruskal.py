@@ -6,6 +6,7 @@ from time import perf_counter_ns
 from random import random, seed
 from random import randint
 import gc
+import matplotlib.pyplot as plt
 
 #import matplotlib.pyplot as plt
 
@@ -74,24 +75,29 @@ def measure_run_time(graph, edges, num_calls, num_instances):
     return avg_time
 
 def measure_graphs_times(graphs, edges_map):
-    num_calls = 10
-    num_instances = 10
+    num_calls = 1
+    num_instances = 1
     run_times = [measure_run_time(graphs[element]['graph'], edges_map[element], num_calls, num_instances) for element in graphs]
     ratios = [None] + [round(run_times[i+1]/run_times[i],3) for i in range(len(graphs.keys())-1)]
-    asympt = []
-    for i in range(len(graphs.keys())):
-        asympt.append(round(graphs[i]['edges'] * math.log2(graphs[i]['nodes']))) 
 
-    size_ratios = [None]
-    for i in range(len(asympt)-1):
-        size_ratios.append(round(asympt[i+1] /asympt[i], 3))
-        
-    #c_estimates = [round(run_times[i]/graphs[i],3) for i in range(len(graphs))]
-    print("Nodes\tEdges\tAsym\tSR\tTime(ns)\tRatio")
+
+    sizes = [graphs[i]['edges'] + graphs[i]['nodes'] for i in range(len(graphs.keys()))]
+    size_ratios = [None] + [round(sizes[i+1] /sizes[i], 3) for i in range(len(sizes)-1)]
+
+    c_estimates = [round(run_times[i]/sizes[i],3) for i in range(len(graphs.keys()))]
+
+    print("Nodes\tEdges\tSize\tSR\tEstimates\tTime(ns)\tRatio")
     print(50*"-")
     for i in graphs:
-        print(graphs[i]['nodes'], graphs[i]['edges'], asympt[i], size_ratios[i],run_times[i], ratios[i], sep="\t")
+        print(graphs[i]['nodes'], graphs[i]['edges'], sizes[i], size_ratios[i], c_estimates[i], run_times[i], ratios[i], sep="\t")
     print(50*"-")
+
+    plt.plot(sizes, run_times)
+    #plt.plot(list_sizes, reference)
+    plt.legend(["Measured time"])
+    plt.ylabel('run time (ns)')
+    plt.xlabel('size')
+    plt.show()
 
 def print_mst_graphs_weight(graphs, edges):
     for index in graphs:
@@ -103,10 +109,10 @@ def print_mst_graphs_weight(graphs, edges):
 
 if __name__ == "__main__":
     files = [
-        "input_random_17_100.txt",
-        "input_random_21_200.txt",
-        "input_random_25_400.txt",
-        "input_random_29_800.txt",
+        "input_random_49_10000.txt",
+        "input_random_53_20000.txt",
+        "input_random_57_40000.txt",
+        "input_random_61_80000.txt",
     ]
     
     graphs = {}
