@@ -112,7 +112,7 @@ def measure_graphs_times(graphs, edges_map):
         print(sizes[i], size_ratios[i], c_estimates[i], run_times[i], ratios[i], sep="\t")
     print(50*"-")
 
-    reference = [1400 * graphs[i]['edges'] * math.log2(graphs[i]['nodes']) for i in range(len(graphs.keys()))]
+    reference = [1400 * graphs[i]['edges'] * graphs[i]['nodes'] for i in range(len(graphs.keys()))]
     plt.plot(run_times, sizes)
     #plt.plot(list_sizes, reference)
     plt.legend(["Measured time"])
