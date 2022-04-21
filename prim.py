@@ -1,19 +1,15 @@
 import math
 from os.path import join
 from time import perf_counter_ns
-from random import random, seed
-from random import randint
 import gc
 import matplotlib.pyplot as plt
 
 graphs_dir = "mst_dataset"
 
-
 class MinHeap:
     """
-    Definition of MinHeap Data Structure. It handle some special cases 
-    for Prim's algorithm, such as the 'Inf' key value, which is not compatible 
-    with native language '<' operation
+    MinHeap Data Structure.
+    It is not generalized, but focused only for Prim's algorithm. 
     """
     def __init__(self, arr) -> None:
         self.heapSize = len(arr)
@@ -55,6 +51,7 @@ class MinHeap:
     def exchange(self, i, j):
         """
             Exchange element in position i with element in position j. 
+            Update also the position of the nodes
         """
         self.nodes[self.heap[i]['node']] = j
         self.nodes[self.heap[j]['node']] = i
@@ -65,7 +62,7 @@ class MinHeap:
 
     def minHeapify(self, i):
         """
-            Function to maintain the property of the Min Heap, that is that
+            Maintain the property of the Min Heap, that is that
             the parent is always lower than the left and right child. 
             If it is not, then exchange the values and run again.
         """
@@ -128,15 +125,15 @@ class MinHeap:
 
     def updateNode(self, node, key, parent):
         """
-            Update the data of an element of the heap, 
-            and reorder the Heap to keep the MinHeap property true, since 
-            the key value can change and become higher then the left or right child
+            Update the data of an element and reoder the MinHeap if necessary
         """
         index = self.getIndexByNode(node)
 
         if index != -1:
             self.heap[index]['key'] = key
             self.heap[index]['parent'] = parent
+
+            #Push the node up in the tree if the new value is lower than the parent
             while index > 0 and not self.isLower(self.heap[self.parent(index)]['key'], self.heap[index]['key']):
                 self.exchange(self.parent(index), index)
                 index = self.parent(index)
@@ -147,7 +144,7 @@ def prim(graph, root):
         Graph is an adjacence list and root is the root of the tree
     """
     supp = {}
-    #All the nodes has Inf weight and no parent
+    #Initialization
     for node in graph.keys():
         supp[node] = {
             'node': node,
@@ -160,8 +157,9 @@ def prim(graph, root):
 
     #Create MinHeap based on key value
     q = MinHeap(list(supp.values()))
+    
     while not q.isEmpty():
-        #Extract the node with minimum weight
+        #Extract the node with minimum weight.
         minimum = q.extractMin()
         #For each node adjacent to minimum node
         for tuple in graph[minimum['node']]:
@@ -179,31 +177,41 @@ def measure_run_time(graph, num_calls, num_instances):
         and get the avarage time in nanoseconds. 
     """
     sum_times = 0.0
+    res = None
     for i in range(num_instances):
         gc.disable() #Disable garbage collector
         start_time = perf_counter_ns() 
         for i in range(num_calls):
-            prim(graph, list(graph.keys())[0])
+            res = prim(graph, list(graph.keys())[0])
         end_time = perf_counter_ns()
         gc.enable()
         sum_times += (end_time - start_time)/num_calls
     avg_time = int(round(sum_times/num_instances))
     # return average time in nanoseconds
-    return avg_time
+    return avg_time, res
 
 
 def measure_graphs_times(graphs):
-    num_calls = 1
-    num_instances = 1
+    num_calls = 100
+    num_instances = 10
     
     #Compute the avarage time of Prim's algorithm execution on each graph
-    run_times = [measure_run_time(graphs[element]['graph'], num_calls, num_instances) for element in graphs]
+    mst_results = []
+    run_times = []
+    for element in graphs:
+        time, res = measure_run_time(graphs[element]['graph'], num_calls, num_instances)
+        run_times.append(time)
+        mst_results.append(res)
+
+    #Get the ratio between one execution time and the previous
     ratios = [None] + [round(run_times[i+1]/run_times[i],3) for i in range(len(graphs.keys())-1)]
 
-    
+    #Graph size
     sizes = [graphs[i]['edges'] + graphs[i]['nodes'] for i in range(len(graphs.keys()))]
+    #Graph size ratio
     size_ratios = [None] + [round(sizes[i+1] /sizes[i], 3) for i in range(len(sizes)-1)]
 
+    #Estimated time
     c_estimates = [round(run_times[i]/(graphs[i]['edges'] * math.log2(graphs[i]['nodes'])),3) for i in range(len(graphs.keys()))]
 
     print("Nodes\tEdges\tSize\tSR\tEstimates\tTime(ns)\tRatio")
@@ -212,30 +220,39 @@ def measure_graphs_times(graphs):
         print(graphs[i]['nodes'], graphs[i]['edges'], sizes[i], size_ratios[i], c_estimates[i], run_times[i], ratios[i], sep="\t")
     print(50*"-")
 
-    reference = [1400 * graphs[i]['edges'] * math.log2(graphs[i]['nodes']) for i in range(len(graphs.keys()))]
-    plt.plot(sizes, run_times)
-    plt.plot(sizes, reference)
-    plt.legend(["Measured time", "Reference"])
+    for res in mst_results:
+        print_mst_graphs_weight(res)
+
+    const_ref = 1100
+    reference = [const_ref * graphs[i]['edges'] * math.log2(graphs[i]['nodes']) for i in range(len(graphs.keys()))]
+    fig, (linear, log) = plt.subplots(2)
+    fig.suptitle("Prim's algorithm")
+
+    linear.plot(sizes, run_times)
+    linear.plot(sizes, reference)
+    linear.legend(["Measured time", "Reference (" + str(const_ref) + ")"])
+
+    log.plot(sizes, run_times)
+    log.plot(sizes, reference)
+    log.legend(["Measured time", "Reference (" + str(const_ref) + ")"])
+    log.set_yscale('log')
+
     plt.ylabel('run time (ns)')
-    #plt.yscale('log')
     plt.xlabel('size')
     plt.show()
 
-def print_mst_graphs_weight(graphs):
-    for index in graphs:
-        graph = graphs[index]['graph']
-        res = prim(graph, list(graph.keys())[0])
-        sum = 0
-        for index in res:
-            sum += res[index]['key']
-        print(sum)
+def print_mst_graphs_weight(res):
+    sum = 0
+    for index in res:
+        sum += res[index]['key']
+    print(sum)
 
 if __name__ == "__main__":
     files = [
-        "input_random_49_10000.txt",
-        "input_random_53_20000.txt",
-        "input_random_57_40000.txt",
-        "input_random_61_80000.txt",
+        "input_random_33_1000.txt",
+        "input_random_37_2000.txt",
+        "input_random_41_4000.txt",
+        "input_random_45_8000.txt",
     ]
 
      #set of graphs
@@ -268,7 +285,6 @@ if __name__ == "__main__":
         j += 1
 
     measure_graphs_times(graphs)
-    #print_mst_graphs_weight(graphs)
 
 
     

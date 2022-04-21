@@ -18,7 +18,7 @@ def dfs_search_cycle(graph, v, node_map, edges_map):
         Depth-First Search to detect a cycle.
         We use a map for the nodes, to take trace of the nodes visited,
         and a map for the edges, for the same reason.
-        Inseat of labelling DISCOVERY_EDGE or BACK_EDGE, we set the value 
+        Instead of labelling DISCOVERY_EDGE or BACK_EDGE, we set the value 
         to True when the edge is visited for the first time, while when 
         we reach a node already visited, we return True, since we detected a cycle
     """
@@ -39,7 +39,7 @@ def dfs_search_cycle(graph, v, node_map, edges_map):
                     return cycle_presence
             else:
                 #If the node is met twice, we found a cycle
-                return True;
+                return True
 
     #No cycles were found
     return False
@@ -49,7 +49,7 @@ def not_make_cycle(edges, edge):
     """
         Check if adding edge to edge_list does not create a cycle
     """
-    #Build a graph with the edges
+    #Build a new graph with the edges and the new one to be add
     graph = {}
     for tuple in (edges + [edge]):
         v1, v2, w = tuple
@@ -73,68 +73,85 @@ def kruskal_naive(edges):
     res = []
     #Sort edges by weight
     sorted_edges_by_w = sorted(edges, key=lambda tup: tup[2])
-    #Iterate edges in nor-decreasing order
+    #Iterate edges in non-decreasing order
     for tuple in sorted_edges_by_w:
+        #Add the edge if it does not create a cycle
         if not_make_cycle(res, tuple):
-            #Add edge if not making a cycle
             res.append(tuple)
 
     return res
 
 def measure_run_time(edges, num_calls, num_instances):
     sum_times = 0.0
+    res = None
     for i in range(num_instances):
         gc.disable() #Disable garbage collector
         start_time = perf_counter_ns() 
         for i in range(num_calls):
-            kruskal_naive(edges)
+            res = kruskal_naive(edges)
         end_time = perf_counter_ns()
         gc.enable()
         sum_times += (end_time - start_time)/num_calls
     avg_time = int(round(sum_times/num_instances))
     # return average time in nanoseconds
-    return avg_time
+    return avg_time, res
 
 def measure_graphs_times(graphs, edges_map):
-    num_calls = 1
-    num_instances = 1
-    run_times = [measure_run_time(edges_map[element], num_calls, num_instances) for element in graphs]
+    num_calls = 5
+    num_instances = 5
+    
+    #Compute the avarage time of Kruskal's algorithm execution on each graph
+    mst_results = []
+    run_times = []
+    for element in graphs:
+        time, res = measure_run_time(edges_map[element], num_calls, num_instances)
+        run_times.append(time)
+        mst_results.append(res)
+
+    #Get the ratio between one execution time and the previous
     ratios = [None] + [round(run_times[i+1]/run_times[i],3) for i in range(len(graphs.keys())-1)]
 
+    #Graph size
     sizes = [graphs[i]['edges'] + graphs[i]['nodes'] for i in range(len(graphs.keys()))]
+    #Graph size ratio
     size_ratios = [None] + [round(sizes[i+1] /sizes[i], 3) for i in range(len(sizes)-1)]
 
-    c_estimates = [round(run_times[i]/graphs[i]['edges'] + graphs[i]['nodes'],3) for i in range(len(graphs.keys()))]
-    
-    print("Size\tSR\tEstimates\tTime(ns)\tRatio")
+    #Estimated time
+    c_estimates = [round(run_times[i]/(graphs[i]['edges'] * graphs[i]['nodes']),3) for i in range(len(graphs.keys()))]
+
+    print("Nodes\tEdges\tSize\tSR\tEstimates\tTime(ns)\tRatio")
     print(50*"-")
     for i in graphs:
-        print(sizes[i], size_ratios[i], c_estimates[i], run_times[i], ratios[i], sep="\t")
+        print(graphs[i]['nodes'], graphs[i]['edges'], sizes[i], size_ratios[i], c_estimates[i], run_times[i], ratios[i], sep="\t")
     print(50*"-")
 
-    reference = [1400 * graphs[i]['edges'] * graphs[i]['nodes'] for i in range(len(graphs.keys()))]
-    plt.plot(run_times, sizes)
-    #plt.plot(list_sizes, reference)
-    plt.legend(["Measured time"])
-    plt.xlabel('run time (ns)')
-    plt.ylabel('size')
+    for res in mst_results:
+        print_mst_graphs_weight(res)
+
+    const_ref = 370
+    reference = [const_ref * graphs[i]['edges'] * graphs[i]['nodes'] for i in range(len(graphs.keys()))]
+    
+    plt.plot(sizes, run_times)
+    plt.plot(sizes, reference)
+    plt.legend(["Measured time", "Reference (" + str(const_ref) + ")"])
+    plt.ylabel('run time (ns)')
+    plt.xlabel('size')
     plt.show()
 
-def print_mst_graphs_weight(graphs, edges):
-    for index in graphs:
-        edges_list = edges[index]
-        res = kruskal_naive(edges_list)
-        sum = 0
-        for elem in res:
-            sum += elem[2]
-        print(sum)
+
+
+def print_mst_graphs_weight(res):
+    sum = 0
+    for elem in res:
+        sum += elem[2]
+    print(sum)
 
 if __name__ == "__main__":
     files = [
-        "input_random_49_10000.txt",
-        #"input_random_53_20000.txt",
-        #"input_random_57_40000.txt",
-        #"input_random_61_80000.txt",
+        "input_random_33_1000.txt",
+        "input_random_37_2000.txt",
+        "input_random_41_4000.txt",
+        "input_random_45_8000.txt",
     ]
     
     graphs = {}
@@ -171,4 +188,3 @@ if __name__ == "__main__":
         j += 1
 
     measure_graphs_times(graphs, edges_map)
-    #print_mst_graphs_weight(graphs, edges_map)
