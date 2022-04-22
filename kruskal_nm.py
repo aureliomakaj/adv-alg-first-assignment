@@ -127,7 +127,7 @@ def measure_graphs_times(graphs, edges_map):
     for res in mst_results:
         print_mst_graphs_weight(res)
 
-    const_ref = 370
+    const_ref = 140
     reference = [const_ref * graphs[i]['edges'] * graphs[i]['nodes'] for i in range(len(graphs.keys()))]
     
     plt.plot(sizes, run_times)
