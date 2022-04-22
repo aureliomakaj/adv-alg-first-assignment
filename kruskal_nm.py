@@ -41,13 +41,24 @@ def dfs_search_cycle(graph, v, node_map, edges_map):
     return False
 
 
-def not_make_cycle(edges, edge):
+def not_make_cycle(edge, graph, node_map, edges_map):
     """
         Check if adding edge to edge_list does not create a cycle
     """
-    #Build a new graph with the edges and the new one to be add
+    #Check for cycle
+    cycle = dfs_search_cycle(graph, edge[0], node_map, edges_map)
+    return not cycle
+
+def kruskal_naive(edges):
+    """
+        Naive Kruskal implementation for MST. 
+    """
+    res = []
     graph = {}
-    for tuple in (edges + [edge]):
+    #Sort edges by weight
+    sorted_edges_by_w = sorted(edges, key=lambda tup: tup[2])
+    #Iterate edges in non-decreasing order
+    for tuple in sorted_edges_by_w:
         v1, v2, w = tuple
         if graph.get(v1) == None:
             graph[v1] = []
@@ -58,22 +69,13 @@ def not_make_cycle(edges, edge):
         graph[v1].append((v2, w))
         graph[v2].append((v1, w))
 
-    #Check for cycle
-    cycle = dfs_search_cycle(graph, edge[0], {}, {})
-    return not cycle
-
-def kruskal_naive(edges):
-    """
-        Naive Kruskal implementation for MST. 
-    """
-    res = []
-    #Sort edges by weight
-    sorted_edges_by_w = sorted(edges, key=lambda tup: tup[2])
-    #Iterate edges in non-decreasing order
-    for tuple in sorted_edges_by_w:
         #Add the edge if it does not create a cycle
-        if not_make_cycle(res, tuple):
+        if not_make_cycle(tuple, graph, {}, {}):
             res.append(tuple)
+        else:
+            graph[v1].pop()
+            graph[v2].pop()
+            
 
     return res
 
