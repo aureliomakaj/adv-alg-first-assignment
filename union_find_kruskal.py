@@ -1,4 +1,3 @@
-from distutils.command.check import HAS_DOCUTILS
 import math
 from os.path import join
 from time import perf_counter_ns
@@ -92,6 +91,7 @@ def measure_run_time(graph, edges, num_calls, num_instances):
         gc.enable()
         sum_times += (end_time - start_time)/num_calls
     avg_time = int(round(sum_times/num_instances))
+    print("Finished")
     # return average time in nanoseconds
     return avg_time, res
 
@@ -127,7 +127,7 @@ def measure_graphs_times(graphs, edges_map):
     for res in mst_results:
         print_mst_graphs_weight(res)
 
-    const_ref = 1100
+    const_ref = 110
     reference = [const_ref * graphs[i]['edges'] * math.log2(graphs[i]['nodes']) for i in range(len(graphs.keys()))]
     fig, (linear, log) = plt.subplots(2)
     fig.suptitle("Kruskal's algorithm")

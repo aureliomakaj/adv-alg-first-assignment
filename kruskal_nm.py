@@ -1,11 +1,7 @@
-from distutils.command.check import HAS_DOCUTILS
 from os.path import join
 from platform import node
 from time import perf_counter_ns
-from random import random, seed
-from random import randint
 import gc
-from collections import OrderedDict
 import matplotlib.pyplot as plt
 
 
@@ -93,6 +89,7 @@ def measure_run_time(edges, num_calls, num_instances):
         gc.enable()
         sum_times += (end_time - start_time)/num_calls
     avg_time = int(round(sum_times/num_instances))
+    print("Finished")
     # return average time in nanoseconds
     return avg_time, res
 
