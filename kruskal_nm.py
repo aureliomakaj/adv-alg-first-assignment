@@ -16,7 +16,7 @@ def dfs_search_cycle(graph, v, node_map, edges_map):
         and a map for the edges, for the same reason.
         Instead of labelling DISCOVERY_EDGE or BACK_EDGE, we set the value 
         to True when the edge is visited for the first time, while when 
-        we reach a node already visited, we return True, since we detected a cycle
+        we reach a node already visited, we return True, since we detected a cycle.
     """
     #Set the node as visited
     node_map[v] = 1
@@ -43,7 +43,11 @@ def dfs_search_cycle(graph, v, node_map, edges_map):
 
 def not_make_cycle(edge, graph, node_map, edges_map):
     """
-        Check if adding edge to edge_list does not create a cycle
+        Check if the adding of edge to the graph has not created a cycle.
+        The input graph may be disconnected, but this is not a problem because
+        the search starts from one node of the edge that we are adding and if the edge is disconnected from the rest, 
+        then we don't have cycles (input graph is acyclic). 
+        If it is connected, the search behave correctly. 
     """
     #Check for cycle
     cycle = dfs_search_cycle(graph, edge[0], node_map, edges_map)
@@ -59,6 +63,7 @@ def kruskal_naive(edges):
     sorted_edges_by_w = sorted(edges, key=lambda tup: tup[2])
     #Iterate edges in non-decreasing order
     for tuple in sorted_edges_by_w:
+        #Build the graph as we keep iterate
         v1, v2, w = tuple
         if graph.get(v1) == None:
             graph[v1] = []
@@ -73,6 +78,7 @@ def kruskal_naive(edges):
         if not_make_cycle(tuple, graph, {}, {}):
             res.append(tuple)
         else:
+            #If the edge make a cycle, remove it from the graph
             graph[v1].pop()
             graph[v2].pop()
             
@@ -96,8 +102,8 @@ def measure_run_time(edges, num_calls, num_instances):
     return avg_time, res
 
 def measure_graphs_times(graphs, edges_map):
-    num_calls = 5
-    num_instances = 5
+    num_calls = 10
+    num_instances = 10
     
     #Compute the avarage time of Kruskal's algorithm execution on each graph
     mst_results = []

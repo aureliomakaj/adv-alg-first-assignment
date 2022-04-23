@@ -40,12 +40,24 @@ class MinHeap:
         """
             Lower operation to handle cases with 'Inf' string value
         """
-        if first == 'Inf':
+        if first == second:
+            return False
+        elif first == 'Inf':
             return False
         elif second == 'Inf':
             return True
         else:
             return first < second
+
+    def isGreater(self, first, second):
+        if first == second:
+            return False
+        elif first == 'Inf':
+            return True
+        elif second == 'Inf':
+            return False
+        else:
+            return first > second
     
 
     def exchange(self, i, j):
@@ -130,6 +142,10 @@ class MinHeap:
         index = self.getIndexByNode(node)
 
         if index != -1:
+            if self.isGreater(key, self.heap[index]['key']):
+                print("New key is greater than current key")
+                exit(1)
+
             self.heap[index]['key'] = key
             self.heap[index]['parent'] = parent
 
