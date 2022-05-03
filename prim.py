@@ -1,8 +1,11 @@
+from genericpath import isfile
 import math
+from os import listdir
 from os.path import join
 from time import perf_counter_ns
 import gc
 import matplotlib.pyplot as plt
+from numpy import sort
 
 graphs_dir = "mst_dataset"
 
@@ -208,7 +211,7 @@ def measure_run_time(graph, num_calls, num_instances):
 
 
 def measure_graphs_times(graphs):
-    num_calls = 100
+    num_calls = 10
     num_instances = 10
     
     #Compute the avarage time of Prim's algorithm execution on each graph
@@ -239,7 +242,7 @@ def measure_graphs_times(graphs):
     for res in mst_results:
         print_mst_graphs_weight(res)
 
-    const_ref = 1100
+    const_ref = 1200
     reference = [const_ref * graphs[i]['edges'] * math.log2(graphs[i]['nodes']) for i in range(len(graphs.keys()))]
     fig, (linear, log) = plt.subplots(2)
     fig.suptitle("Prim's algorithm")
@@ -264,14 +267,13 @@ def print_mst_graphs_weight(res):
     print(sum)
 
 if __name__ == "__main__":
-    files = [
+    """files = [
         "input_random_33_1000.txt",
         "input_random_37_2000.txt",
         "input_random_41_4000.txt",
         "input_random_45_8000.txt",
-    ]
-
-     #set of graphs
+    ]"""
+    files = sort([f for f in listdir(graphs_dir) if isfile(join(graphs_dir, f))])
     graphs = {}
     j = 0
     for filename in files:

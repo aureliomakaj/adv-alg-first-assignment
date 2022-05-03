@@ -1,0 +1,47 @@
+input_random_01_10.txt
+input_random_02_10.txt
+input_random_03_10.txt
+input_random_04_10.txt
+input_random_05_20.txt
+input_random_06_20.txt
+input_random_07_20.txt
+input_random_08_20.txt
+input_random_09_40.txt
+input_random_10_40.txt
+input_random_11_40.txt
+Finished
+Finished
+Finished
+Finished
+Finished
+Finished
+Finished
+Finished
+Finished
+Finished
+Finished
+Nodes	Edges	Size	SR	Estimates	Time(ns)	Ratio
+--------------------------------------------------
+10	9	19	None	456.944	41125	None
+10	11	21	1.105	348.809	38369	0.933
+10	13	23	1.095	366.115	47595	1.24
+10	10	20	0.87	376.97	37697	0.792
+20	24	44	2.2	367.379	176342	4.678
+20	24	44	1.0	275.933	132448	0.751
+20	28	48	1.091	373.191	208987	1.578
+20	26	46	0.958	282.398	146847	0.703
+40	56	96	2.087	242.957	544224	3.706
+40	50	90	0.938	203.714	407429	0.749
+40	50	90	1.0	205.384	410768	1.008
+--------------------------------------------------
+29316
+16940
+-44448
+25217
+-32021
+25130
+-41693
+-37205
+-114203
+-31929
+-79570

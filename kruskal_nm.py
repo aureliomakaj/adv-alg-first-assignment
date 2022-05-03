@@ -1,8 +1,11 @@
+from genericpath import isfile
+from os import listdir
 from os.path import join
 from platform import node
 from time import perf_counter_ns
 import gc
 import matplotlib.pyplot as plt
+from numpy import sort
 
 
 #import matplotlib.pyplot as plt
@@ -102,8 +105,8 @@ def measure_run_time(edges, num_calls, num_instances):
     return avg_time, res
 
 def measure_graphs_times(graphs, edges_map):
-    num_calls = 10
-    num_instances = 10
+    num_calls = 1
+    num_instances = 1
     
     #Compute the avarage time of Kruskal's algorithm execution on each graph
     mst_results = []
@@ -152,12 +155,7 @@ def print_mst_graphs_weight(res):
     print(sum)
 
 if __name__ == "__main__":
-    files = [
-        "input_random_33_1000.txt",
-        "input_random_37_2000.txt",
-        "input_random_41_4000.txt",
-        "input_random_45_8000.txt",
-    ]
+    files = sort([f for f in listdir(graphs_dir) if isfile(join(graphs_dir, f))])
     
     graphs = {}
     edges_map = {}
@@ -191,5 +189,8 @@ if __name__ == "__main__":
 
         edges_map[j] = edges_list
         j += 1
+        print(filename)
+        if j > 10:
+            break
 
     measure_graphs_times(graphs, edges_map)
