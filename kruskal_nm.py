@@ -9,7 +9,8 @@ from numpy import sort
 
 
 #import matplotlib.pyplot as plt
-
+global global_var
+global_var = 0
 graphs_dir = "mst_dataset"        
 
 def dfs_search_cycle(graph, v, node_map, edges_map):
@@ -89,6 +90,8 @@ def kruskal_naive(edges):
     return res
 
 def measure_run_time(edges, num_calls, num_instances):
+    global global_var
+    global_var  = global_var + 1
     sum_times = 0.0
     res = None
     for i in range(num_instances):
@@ -100,7 +103,8 @@ def measure_run_time(edges, num_calls, num_instances):
         gc.enable()
         sum_times += (end_time - start_time)/num_calls
     avg_time = int(round(sum_times/num_instances))
-    print("Finished")
+    print("Finished n:", global_var)
+
     # return average time in nanoseconds
     return avg_time, res
 
@@ -136,7 +140,7 @@ def measure_graphs_times(graphs, edges_map):
     for res in mst_results:
         print_mst_graphs_weight(res)
 
-    const_ref = 140
+    const_ref = 150
     reference = [const_ref * graphs[i]['edges'] * graphs[i]['nodes'] for i in range(len(graphs.keys()))]
     
     plt.plot(sizes, run_times)
@@ -144,7 +148,8 @@ def measure_graphs_times(graphs, edges_map):
     plt.legend(["Measured time", "Reference (" + str(const_ref) + ")"])
     plt.ylabel('run time (ns)')
     plt.xlabel('size')
-    plt.show()
+    plt.savefig('aaaaaa.png')
+
 
 
 
@@ -189,8 +194,5 @@ if __name__ == "__main__":
 
         edges_map[j] = edges_list
         j += 1
-        print(filename)
-        if j > 10:
-            break
 
     measure_graphs_times(graphs, edges_map)
